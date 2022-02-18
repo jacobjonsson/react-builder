@@ -1,5 +1,11 @@
 import type { MutableRefObject } from "react";
 
+export interface Block {
+  id: string;
+  name: string;
+  items: TreeItem[];
+}
+
 export interface TreeItem {
   id: string;
   data: WorkoutData;

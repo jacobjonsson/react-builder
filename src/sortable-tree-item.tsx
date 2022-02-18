@@ -38,7 +38,7 @@ export function SortableTreeItem({
       wrapperRef={setDroppableNodeRef}
       depth={depth}
       style={style}
-      ghost={isDragging}
+      isDragging={isDragging}
       {...rest}
       handleProps={{
         ...attributes,

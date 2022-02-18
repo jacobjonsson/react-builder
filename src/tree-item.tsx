@@ -8,15 +8,20 @@ import {
 } from "@heroicons/react/outline";
 import { WorkoutData } from "./types";
 import clsx from "clsx";
+import { HandleButton, HandleButtonProps } from "./handle-button";
+import { RemoveButton } from "./remove-button";
+import { DuplicateButton } from "./duplicate-button";
+import { EditButton } from "./edit-button";
+import { CollapseButton } from "./collapse-button";
 
 export interface TreeItemProps extends HTMLAttributes<HTMLDivElement> {
-  clone?: boolean;
-  ghost?: boolean;
   depth: number;
-  handleProps?: HTMLAttributes<HTMLButtonElement>;
+  handleProps?: HandleButtonProps;
   data: WorkoutData;
-  collapsible?: boolean;
-  collapsed?: boolean;
+  isCollapsible?: boolean;
+  isCollapsed?: boolean;
+  isDragging?: boolean;
+  isOverlay?: boolean;
   onDuplicate?: () => void;
   onEdit?: () => void;
   onRemove?: () => void;
@@ -29,13 +34,13 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
     {
       handleProps,
       wrapperRef,
-      collapsible,
-      collapsed,
+      isCollapsible: collapsible,
+      isCollapsed: collapsed,
       data,
       depth,
       style,
-      ghost,
-      clone,
+      isDragging,
+      isOverlay: overlay,
       onEdit,
       onDuplicate,
       onRemove,
@@ -53,29 +58,23 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
         <div
           ref={ref}
           className={clsx(
-            "flex items-center justify-between border border-gray-300 p-4 rounded bg-white touch-none select-none",
-            ghost && "opacity-50",
-            clone && "shadow-2xl"
+            "flex items-center justify-between border border-gray-300 p-4 rounded bg-white touch-none select-none dark:bg-gray-900",
+            isDragging && "opacity-50",
+            overlay && "shadow-2xl"
           )}
         >
           <div className="flex gap-2">
-            <button type="button" {...handleProps} className="cursor-grab">
-              <svg viewBox="0 0 20 20" width="12">
-                <path d="M7 2a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 2zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 8zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 7 14zm6-8a2 2 0 1 0-.001-4.001A2 2 0 0 0 13 6zm0 2a2 2 0 1 0 .001 4.001A2 2 0 0 0 13 8zm0 6a2 2 0 1 0 .001 4.001A2 2 0 0 0 13 14z"></path>
-              </svg>
-            </button>
+            <HandleButton
+              {...handleProps}
+              isDragging={isDragging}
+              isOverlay={overlay}
+            />
 
             {collapsible && (
-              <button className="h-5 w-5" type="button" onClick={onCollapse}>
-                {collapsed ? (
-                  <ChevronRightIcon className="h-5 w-5" />
-                ) : (
-                  <ChevronDownIcon className="h-5 w-5" />
-                )}
-              </button>
+              <CollapseButton isCollapsed={collapsed} onClick={onCollapse} />
             )}
 
-            <span>
+            <div className="dark:text-white">
               {data.type === "EXERCISE" ? (
                 <ExerciseDataDisplay data={data} />
               ) : data.type === "REPEAT" ? (
@@ -83,20 +82,13 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
               ) : data.type === "REST" ? (
                 <RestDataDisplay data={data} />
               ) : null}
-            </span>
+            </div>
           </div>
+
           <div className="flex gap-2">
-            <button className="h-5 w-5 " type="button" onClick={onEdit}>
-              <PencilAltIcon className="h-5 w-5" />
-            </button>
-
-            <button className="h-5 w-5 " type="button" onClick={onDuplicate}>
-              <DuplicateIcon className="h-5 w-5" />
-            </button>
-
-            <button className="h-5 w-5 " type="button" onClick={onRemove}>
-              <XIcon className="h-5 w-5" />
-            </button>
+            <EditButton onClick={onEdit} />
+            <DuplicateButton onClick={onDuplicate} />
+            <RemoveButton onClick={onRemove} />
           </div>
         </div>
       </div>

@@ -15,7 +15,13 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { TreeItems, SensorContext, FlattenedItem, WorkoutData } from "./types";
+import {
+  TreeItems,
+  SensorContext,
+  FlattenedItem,
+  WorkoutData,
+  Block,
+} from "./types";
 import {
   buildTree,
   flattenTree,
@@ -34,6 +40,10 @@ import { SortableTreeItem } from "./sortable-tree-item";
 import { createPortal } from "react-dom";
 import { AddItemModal } from "./add-item-modal";
 import * as uuid from "uuid";
+import { AddItemButton } from "./add-item-button";
+import { AddBlockButton } from "./add-block-button";
+
+const initialBlocks: Block[] = [{ id: "block-a", name: "Block A", items: [] }];
 
 const initialItems: TreeItems = [
   {
@@ -232,9 +242,24 @@ export function App() {
     );
     const item = clonedItems.find((item) => item.id === id);
     const clonedItem: FlattenedItem = JSON.parse(JSON.stringify(item));
-    clonedItem.id = `${clonedItem.id}-copy`;
+    clonedItem.id = uuid.v4();
     let index = clonedItems.findIndex(({ id: itemId }) => itemId === id);
     clonedItems.splice(index + 1, 0, clonedItem);
+
+    const clonedChildren: FlattenedItem[] = [];
+    for (const item of clonedItems) {
+      if (item.parentId === id) {
+        const cloned = JSON.parse(JSON.stringify(item));
+        cloned.id = uuid.v4();
+        cloned.parentId = clonedItem.id;
+        clonedChildren.push(cloned);
+      }
+    }
+
+    for (const child of clonedChildren.reverse()) {
+      clonedItems.splice(index + 1, 0, child);
+    }
+
     const newItems = buildTree(clonedItems);
     setItems(newItems);
   }
@@ -292,19 +317,10 @@ export function App() {
       onDragCancel={handleDragCancel}
     >
       <div className="max-w-4xl mx-auto p-4">
-        <button
-          type="button"
-          onClick={() => setShowModal({ open: true })}
-          className="border border-gray-300 rounded px-4 py-2 mb-4 w-full hover:bg-gray-50"
-        >
-          Add item
-        </button>
-        {showModal.open && (
-          <AddItemModal
-            onClose={() => setShowModal({ open: false })}
-            onSubmit={handleAddItem}
-          />
-        )}
+        <input
+          className="bg-transparent border border-transparent text-gray-900 text-xl rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 mb-4"
+          defaultValue="Block A"
+        />
 
         <SortableContext
           items={sortedIds}
@@ -318,8 +334,8 @@ export function App() {
               depth={
                 item.id === activeId && projected ? projected.depth : item.depth
               }
-              collapsible={item.supportsChildren}
-              collapsed={item.collapsed}
+              isCollapsible={item.supportsChildren}
+              isCollapsed={item.collapsed}
               onCollapse={() => handleCollapse(item.id)}
               onRemove={() => handleRemove(item.id)}
               onDuplicate={() => handleDuplicate(item.id)}
@@ -333,15 +349,28 @@ export function App() {
                   id={activeId}
                   depth={activeItem.depth}
                   data={activeItem.data}
-                  collapsible={activeItem.supportsChildren}
-                  collapsed={activeItem.collapsed}
-                  clone
+                  isCollapsible={activeItem.supportsChildren}
+                  isCollapsed={activeItem.collapsed}
+                  isOverlay
                 />
               )}
             </DragOverlay>,
             document.body
           )}
         </SortableContext>
+
+        <div className="space-y-4 mt-8">
+          <AddItemButton onClick={() => setShowModal({ open: true })} />
+
+          <AddBlockButton />
+        </div>
+
+        {showModal.open && (
+          <AddItemModal
+            onClose={() => setShowModal({ open: false })}
+            onSubmit={handleAddItem}
+          />
+        )}
       </div>
     </DndContext>
   );
