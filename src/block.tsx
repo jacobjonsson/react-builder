@@ -265,7 +265,10 @@ export function Block({
           ({ id: childId }) => childId !== id
         );
         newItems.push({ ...item, children: newChildren });
+        continue;
       }
+
+      newItems.push(item);
     }
     setItems(newItems);
   }
