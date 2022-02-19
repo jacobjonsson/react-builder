@@ -1,11 +1,4 @@
 import { forwardRef, HTMLAttributes } from "react";
-import {
-  XIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
-  PencilAltIcon,
-  DuplicateIcon,
-} from "@heroicons/react/outline";
 import { WorkoutData } from "./types";
 import clsx from "clsx";
 import { HandleButton, HandleButtonProps } from "./handle-button";
@@ -34,8 +27,8 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
     {
       handleProps,
       wrapperRef,
-      isCollapsible: collapsible,
-      isCollapsed: collapsed,
+      isCollapsible,
+      isCollapsed,
       data,
       depth,
       style,
@@ -52,7 +45,7 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
     return (
       <div
         ref={wrapperRef}
-        style={{ paddingLeft: `${50 * depth}px`, ...style }}
+        style={{ paddingLeft: `${32 * depth}px`, ...style }}
         {...rest}
       >
         <div
@@ -70,8 +63,8 @@ export const TreeItem = forwardRef<HTMLDivElement, TreeItemProps>(
               isOverlay={overlay}
             />
 
-            {collapsible && (
-              <CollapseButton isCollapsed={collapsed} onClick={onCollapse} />
+            {isCollapsible && (
+              <CollapseButton isCollapsed={isCollapsed} onClick={onCollapse} />
             )}
 
             <div className="dark:text-white">

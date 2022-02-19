@@ -1,15 +1,15 @@
 import type { MutableRefObject } from "react";
 
-export interface Block {
+export interface IBlock {
   id: string;
   name: string;
-  items: TreeItem[];
+  items: ITreeItem[];
 }
 
-export interface TreeItem {
+export interface ITreeItem {
   id: string;
   data: WorkoutData;
-  children?: TreeItem[];
+  children?: ITreeItem[];
   collapsed?: boolean;
 }
 
@@ -58,9 +58,9 @@ export type Repeat =
       rounds: number;
     };
 
-export type TreeItems = TreeItem[];
+export type TreeItems = ITreeItem[];
 
-export interface FlattenedItem extends TreeItem {
+export interface FlattenedItem extends ITreeItem {
   parentId: null | string;
   depth: number;
   index: number;

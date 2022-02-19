@@ -1,8 +1,5 @@
 import { arrayMove } from "@dnd-kit/sortable";
-
-import type { FlattenedItem, TreeItem, TreeItems } from "./types";
-
-export const iOS = /iPad|iPhone|iPod/.test(navigator.platform);
+import type { FlattenedItem, ITreeItem, TreeItems } from "./types";
 
 function getDragDepth(offset: number, indentationWidth: number) {
   return Math.round(offset / indentationWidth);
@@ -120,33 +117,33 @@ export function flattenTree(items: TreeItems): FlattenedItem[] {
 }
 
 export function buildTree(flattenedItems: FlattenedItem[]): TreeItems {
-  const root: TreeItem = { id: "root", children: [] };
-  const nodes: Record<string, TreeItem> = { [root.id]: root };
+  const root = { id: "root", children: [] } as unknown as ITreeItem;
+  const nodes: Record<string, ITreeItem> = { [root.id]: root };
   const items = flattenedItems.map((item) => ({
     ...item,
     ...(item.supportsChildren && { children: [] }),
   }));
 
   for (const item of items) {
-    const { id, children } = item;
+    const { id, children, data } = item;
     const parentId = item.parentId ?? root.id;
     const parent = nodes[parentId] ?? findItem(items, parentId);
 
-    nodes[id] = { id, children };
+    nodes[id] = { id, data, children };
     parent.children?.push(item);
   }
 
   return root.children || [];
 }
 
-export function findItem(items: TreeItem[], itemId: string) {
+export function findItem(items: ITreeItem[], itemId: string) {
   return items.find(({ id }) => id === itemId);
 }
 
 export function findItemDeep(
   items: TreeItems,
   itemId: string
-): TreeItem | undefined {
+): ITreeItem | undefined {
   for (const item of items) {
     const { id, children } = item;
 
@@ -166,45 +163,7 @@ export function findItemDeep(
   return undefined;
 }
 
-export function removeItem(items: TreeItems, id: string) {
-  const newItems = [];
-
-  for (const item of items) {
-    if (item.id === id) {
-      continue;
-    }
-
-    if (item.children?.length) {
-      item.children = removeItem(item.children, id);
-    }
-
-    newItems.push(item);
-  }
-
-  return newItems;
-}
-
-export function setProperty<T extends keyof TreeItem>(
-  items: TreeItems,
-  id: string,
-  property: T,
-  setter: (value: TreeItem[T]) => TreeItem[T]
-) {
-  for (const item of items) {
-    if (item.id === id) {
-      item[property] = setter(item[property]);
-      continue;
-    }
-
-    if (item.children?.length) {
-      item.children = setProperty(item.children, id, property, setter);
-    }
-  }
-
-  return [...items];
-}
-
-function countChildren(items: TreeItem[], count = 0): number {
+function countChildren(items: ITreeItem[], count = 0): number {
   return items.reduce((acc, { children }) => {
     if (children?.length) {
       return countChildren(children, acc + 1);
