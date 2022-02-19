@@ -48,6 +48,10 @@ type AppEvent =
       type: "UPDATE_BLOCK_NAME";
       name: string;
       blockId: string;
+    }
+  | {
+      type: "REMOVE_BLOCK";
+      blockId: string;
     };
 
 const reducer = produce((draft: AppState, event: AppEvent) => {
@@ -80,6 +84,14 @@ const reducer = produce((draft: AppState, event: AppEvent) => {
       draft.blocks[blockIndex].name = event.name;
       break;
     }
+
+    case "REMOVE_BLOCK": {
+      const blockIndex = draft.blocks.findIndex(
+        (block) => block.id === event.blockId
+      );
+      draft.blocks.splice(blockIndex, 1);
+      break;
+    }
   }
 });
 
@@ -93,6 +105,7 @@ export function App() {
           key={block.id}
           name={block.name}
           items={block.items}
+          isRemovable={state.blocks.length > 1}
           setItems={(items) =>
             dispatch({ type: "UPDATE_ITEMS", items, blockId: block.id })
           }
@@ -102,6 +115,7 @@ export function App() {
           onNameChange={(name) =>
             dispatch({ type: "UPDATE_BLOCK_NAME", name, blockId: block.id })
           }
+          onRemove={() => dispatch({ type: "REMOVE_BLOCK", blockId: block.id })}
         />
       ))}
     </div>

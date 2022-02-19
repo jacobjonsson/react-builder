@@ -14,14 +14,7 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   TreeItems,
   SensorContext,
@@ -48,49 +41,7 @@ import * as uuid from "uuid";
 import { AddItemButton } from "./add-item-button";
 import { AddBlockButton } from "./add-block-button";
 import produce from "immer";
-
-const initialItems: TreeItems = [
-  {
-    id: "item1",
-    data: {
-      type: "REPEAT",
-      repeat: { type: "ROUNDS", rounds: 3 },
-    },
-    children: [
-      {
-        id: "item1.1",
-        data: {
-          type: "EXERCISE",
-          exercise: "Back Squat",
-          scoring: { type: "REPS", reps: 5 },
-        },
-      },
-    ],
-  },
-  {
-    id: "item2",
-    data: {
-      type: "EXERCISE",
-      exercise: "Bench Press",
-      scoring: { type: "REPS", reps: 5 },
-    },
-  },
-  {
-    id: "item3",
-    data: {
-      type: "REST",
-      duration: 60,
-    },
-  },
-  {
-    id: "item4",
-    data: {
-      type: "EXERCISE",
-      exercise: "Deadlift",
-      scoring: { type: "REPS", reps: 5 },
-    },
-  },
-];
+import { XIcon } from "@heroicons/react/outline";
 
 const measuring = {
   droppable: {
@@ -111,6 +62,8 @@ interface BlockProps {
   setItems: (items: ITreeItem[]) => void;
   onAddBlock: () => void;
   onNameChange: (name: string) => void;
+  onRemove: () => void;
+  isRemovable: boolean;
 }
 
 export function Block({
@@ -119,6 +72,8 @@ export function Block({
   setItems,
   onAddBlock,
   onNameChange,
+  onRemove,
+  isRemovable,
 }: BlockProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
@@ -354,11 +309,22 @@ export function Block({
       onDragCancel={handleDragCancel}
     >
       <div className="max-w-4xl mx-auto p-4">
-        <input
-          className="bg-transparent border border-transparent text-gray-900 text-xl rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 mb-4"
-          value={name}
-          onChange={(e) => onNameChange(e.target.value)}
-        />
+        <div className="flex gap-4 justify-between items-center mb-4">
+          <input
+            className="bg-transparent border border-transparent text-gray-900 text-lg rounded focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            value={name}
+            onChange={(e) => onNameChange(e.target.value)}
+          />
+          {isRemovable && (
+            <button
+              type="button"
+              onClick={onRemove}
+              className="p-2.5 rounded bg-red-600 text-white"
+            >
+              <XIcon className="h-5 w-5" />
+            </button>
+          )}
+        </div>
 
         <SortableContext
           items={sortedIds}
